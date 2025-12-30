@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeopardy Game Night</title>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+        .bg-blue-900 { background-color: #1e3a8a; }
+        .bg-blue-800 { background-color: #1e40af; }
+        .bg-blue-700 { background-color: #1d4ed8; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-blue-500 { background-color: #3b82f6; }
+        .bg-red-500 { background-color: #ef4444; }
+        .bg-red-600 { background-color: #dc2626; }
+        .bg-green-500 { background-color: #22c55e; }
+        .bg-green-600 { background-color: #16a34a; }
+        .bg-yellow-400 { background-color: #facc15; }
+        .bg-yellow-500 { background-color: #eab308; }
+        .text-white { color: white; }
+        .text-yellow-400 { color: #facc15; }
+        .text-blue-900 { color: #1e3a8a; }
+        .text-blue-700 { color: #1d4ed8; }
+        .min-h-screen { min-height: 100vh; }
+        .p-6 { padding: 1.5rem; }
+        .p-4 { padding: 1rem; }
+        .p-8 { padding: 2rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-2 { padding: 0.5rem; }
+        .px-8 { padding-left: 2rem; padding-right: 2rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mt-8 { margin-top: 2rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded { border-radius: 0.25rem; }
+        .text-5xl { font-size: 3rem; line-height: 1; }
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .font-bold { font-weight: 700; }
+        .text-center { text-align: center; }
+        .max-w-7xl { max-width: 80rem; }
+        .max-w-4xl { max-width: 56rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .grid { display: grid; }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+        .gap-4 { gap: 1rem; }
+        .gap-2 { gap: 0.5rem; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .w-full { width: 100%; }
+        .h-20 { height: 5rem; }
+        .min-h-80 { min-height: 200px; }
+        button { cursor: pointer; border: none; transition: all 0.2s; }
+        button:hover:not(:disabled) { transform: scale(1.05); opacity: 0.9; }
+        button:disabled { cursor: not-allowed; opacity: 0.5; }
+        .tracking-wider { letter-spacing: 0.05em; }
+        .category-header { min-height: 80px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        const { useState } = React;
+
+        const JeopardyGame = () => {
+            const [screen, setScreen] = useState('board');
+            const [selectedQuestion, setSelectedQuestion] = useState(null);
+            const [showAnswer, setShowAnswer] = useState(false);
+            const [teams, setTeams] = useState([
+                { name: 'Team 1', score: 0, color: 'bg-blue-500' },
+                { name: 'Team 2', score: 0, color: 'bg-red-500' },
+                { name: 'Team 3', score: 0, color: 'bg-green-500' }
+            ]);
+            const [usedQuestions, setUsedQuestions] = useState(new Set());
+
+            const categories = [
+                {
+                    name: 'Technology',
+                    questions: [
+                        { value: 200, q: 'This device is commonly used to make calls and send text messages', a: 'What is a smartphone or cellphone?' },
+                        { value: 400, q: 'What does "AI" stand for in technology?', a: 'What is Artificial Intelligence?' },
+                        { value: 600, q: 'This video game console, released in the mid-2000s, pioneered the use of motion controls.', a: 'What is the Wii?' },
+                        { value: 800, q: 'This acronym stands for the address of a website, such as "google.com"', a: 'What is URL (Uniform Resource Locator)?' },
+                        { value: 1000, q: 'What year was the first iPhone released by Apple?', a: 'What is 2007?' }
+                    ]
+                },
+                {
+                    name: 'Drunk Things',
+                    questions: [
+                        { value: 200, q: 'This word is used to describe being slightly intoxicated or under the influence of alcohol.', a: 'What is tipsy?' },
+                        { value: 400, q: 'To be influenced by alcohol to the point where it is excessive.', a: 'What is alcoholic?' },
+                        { value: 600, q: 'Drinking so much that the next day you wont remember anything.', a: 'What is blackout?' },
+                        { value: 800, q: 'Going to the bathroom the first time after beginning a drinking session.', a: 'What is breaking the seal?' },
+                        { value: 1000, q: 'This word is used to describe being drunk or intoxicated, formally.', a: 'What is Inebriated?' }
+                    ]
+                },
+                {
+                    name: 'Movies & TV',
+                    questions: [
+                        { value: 200, q: 'This TV show features 4 children from the small town of Hawkins trying to save their town from a supernatural threat.', a: 'What is Stranger Things?' },
+                        { value: 400, q: 'This franchise, short for \'Pocket Monsters\' features creatures you catch, train, and battle', a: 'What is Pokémon?' },
+                        { value: 600, q: 'This TV show features two children that get into mischief and build incredible inventions usually in their backyard.', a: 'What is Phineas and Ferb?' },
+                        { value: 800, q: 'This movie has the famous line "Life is like a box of chocolates."', a: 'What is Forest Gump?' },
+                        { value: 1000, q: 'This is the hot-tempered, green-hat-wearing fourth grader who frequently argues with Eric Cartman on the long-running show South Park.', a: 'Who is Kyle?' }
+                    ]
+                },
+                {
+                    name: 'Common Knowledge',
+                    questions: [
+                        { value: 200, q: 'This word is the "powerhouse of the cell," where most of its energy is produced.', a: 'What is mitochondria?' },
+                        { value: 400, q: 'This chemical element, represented by the symbol Au', a: 'What is Gold?' },
+                        { value: 600, q: 'Often mistaken for the world\'s largest desert, the Sahara is actually second to this desert.', a: 'What is the Antarctic Polar Desert?' },
+                        { value: 800, q: 'This common garden mollusk can sleep for up to three years at a time to survive extreme weather.', a: 'What is a snail?' },
+                        { value: 1000, q: 'This country is know for many things, one being that is has the most time zones.', a: 'What is France?' }
+                    ]
+                },
+                {
+                    name: 'Earth History',
+                    questions: [
+                        { value: 200, q: 'This molecule/gas is what humans use to breathe.', a: 'What is Oxygen?' },
+                        { value: 400, q: 'This layer of the Earth is made of solid rock and is the thickest layer.', a: 'What is the Mantle?' },
+                        { value: 600, q: 'This empire was the dominant power in Europe, North Africa, and the Middle East for centuries.', a: 'What is the Roman Empire?' },
+                        { value: 800, q: 'This theory describes the origin of the universe.', a: 'What is the Big Bang Theory?' },
+                        { value: 1000, q: 'Considered to be the very first living organism on Earth.', a: 'What is a single-celled organism or Microbe?' }
+                    ]
+                },
+                {
+                    name: 'The Study-ology',
+                    questions: [
+                        { value: 200, q: 'The study of life.', a: 'What is Biology?' },
+                        { value: 400, q: 'The study of past human life and culture through excavation.', a: 'What is Archaeology?' },
+                        { value: 600, q: 'The study of humans.', a: 'What is Anthropology?' },
+                        { value: 800, q: 'The study of the relationships between living organisms and their environment', a: 'What is Ecology?' },
+                        { value: 1000, q: 'The study of blood.', a: 'What is Hematology?' }
+                    ]
+                }
+            ];
+
+            const updateScore = (teamIndex, amount) => {
+                setTeams(teams.map((team, i) => 
+                    i === teamIndex ? { ...team, score: Math.max(0, team.score + amount) } : team
+                ));
+            };
+
+            const selectQuestion = (catIndex, qIndex) => {
+                const key = `${catIndex}-${qIndex}`;
+                if (usedQuestions.has(key)) return;
+                
+                setSelectedQuestion({ catIndex, qIndex });
+                setShowAnswer(false);
+                setScreen('question');
+            };
+
+            const markUsed = () => {
+                const key = `${selectedQuestion.catIndex}-${selectedQuestion.qIndex}`;
+                setUsedQuestions(new Set([...usedQuestions, key]));
+                setScreen('board');
+                setSelectedQuestion(null);
+                setShowAnswer(false);
+            };
+
+            const goToBoard = () => {
+                setScreen('board');
+                setSelectedQuestion(null);
+                setShowAnswer(false);
+            };
+
+            const isUsed = (catIndex, qIndex) => {
+                return usedQuestions.has(`${catIndex}-${qIndex}`);
+            };
+
+            if (screen === 'board') {
+                return React.createElement('div', { className: 'min-h-screen bg-blue-900 p-6' },
+                    React.createElement('div', { className: 'max-w-7xl mx-auto' },
+                        React.createElement('h1', { className: 'text-5xl font-bold text-yellow-400 text-center mb-8 tracking-wider' }, 'JEOPARDY!'),
+                        
+                        React.createElement('div', { className: 'grid grid-cols-3 gap-4 mb-8' },
+                            teams.map((team, i) =>
+                                React.createElement('div', { key: i, className: `${team.color} rounded-lg p-4 text-white` },
+                                    React.createElement('h3', { className: 'text-xl font-bold text-center mb-2' }, team.name),
+                                    React.createElement('div', { className: 'text-4xl font-bold text-center mb-3' }, `$${team.score}`),
+                                    React.createElement('div', { className: 'flex gap-2 justify-center' },
+                                        React.createElement('button', {
+                                            onClick: () => updateScore(i, -100),
+                                            className: 'p-2 rounded',
+                                            style: { backgroundColor: 'rgba(255,255,255,0.2)' }
+                                        }, '−'),
+                                        React.createElement('button', {
+                                            onClick: () => updateScore(i, 100),
+                                            className: 'p-2 rounded',
+                                            style: { backgroundColor: 'rgba(255,255,255,0.2)' }
+                                        }, '+')
+                                    )
+                                )
+                            )
+                        ),
+
+                        React.createElement('div', { className: 'grid grid-cols-6 gap-2' },
+                            categories.map((cat, catIndex) =>
+                                React.createElement('div', { key: catIndex },
+                                    React.createElement('div', { className: 'bg-blue-700 text-yellow-400 text-center p-3 font-bold text-base mb-2 rounded category-header flex items-center justify-center' },
+                                        cat.name.toUpperCase()
+                                    ),
+                                    cat.questions.map((q, qIndex) => {
+                                        const used = isUsed(catIndex, qIndex);
+                                        return React.createElement('button', {
+                                            key: qIndex,
+                                            onClick: () => selectQuestion(catIndex, qIndex),
+                                            disabled: used,
+                                            className: `w-full h-20 mb-2 rounded text-3xl font-bold ${used ? 'text-blue-700' : 'bg-blue-600 text-yellow-400'}`,
+                                            style: { backgroundColor: used ? 'rgba(30,64,175,0.3)' : '#2563eb' }
+                                        }, used ? '✓' : `$${q.value}`);
+                                    })
+                                )
+                            )
+                        )
+                    )
+                );
+            }
+
+            if (screen === 'question' && selectedQuestion) {
+                const { catIndex, qIndex } = selectedQuestion;
+                const question = categories[catIndex].questions[qIndex];
+
+                return React.createElement('div', { className: 'min-h-screen bg-blue-900 flex items-center justify-center p-6' },
+                    React.createElement('div', { className: 'max-w-4xl w-full' },
+                        React.createElement('div', { className: 'bg-blue-700 rounded-lg p-8 mb-6' },
+                            React.createElement('div', { className: 'text-yellow-400 text-center text-2xl font-bold mb-4' },
+                                `${categories[catIndex].name.toUpperCase()} - $${question.value}`
+                            ),
+                            React.createElement('div', { className: 'bg-blue-800 rounded p-8 min-h-80 flex items-center justify-center' },
+                                React.createElement('p', { className: 'text-white text-3xl text-center' },
+                                    showAnswer ? question.a : question.q
+                                )
+                            )
+                        ),
+
+                        React.createElement('div', { className: 'flex gap-4 justify-center' },
+                            !showAnswer ?
+                                React.createElement('button', {
+                                    onClick: () => setShowAnswer(true),
+                                    className: 'bg-yellow-400 text-blue-900 px-8 py-4 rounded-lg text-xl font-bold'
+                                }, 'Show Answer') :
+                                React.createElement('button', {
+                                    onClick: markUsed,
+                                    className: 'bg-green-500 text-white px-8 py-4 rounded-lg text-xl font-bold'
+                                }, 'Mark Complete & Return'),
+                            
+                            React.createElement('button', {
+                                onClick: goToBoard,
+                                className: 'bg-blue-600 text-white px-8 py-4 rounded-lg text-xl font-bold'
+                            }, '🏠 Back to Board')
+                        ),
+
+                        React.createElement('div', { className: 'mt-8 grid grid-cols-3 gap-4' },
+                            teams.map((team, i) =>
+                                React.createElement('div', { key: i, className: `${team.color} rounded p-4` },
+                                    React.createElement('div', { className: 'text-white text-center font-bold mb-2' }, team.name),
+                                    React.createElement('div', { className: 'text-white text-3xl font-bold text-center mb-3' }, `$${team.score}`),
+                                    React.createElement('div', { className: 'flex gap-2 justify-center' },
+                                        React.createElement('button', {
+                                            onClick: () => updateScore(i, -question.value),
+                                            className: 'bg-red-500 text-white px-4 py-2 rounded'
+                                        }, `-${question.value}`),
+                                        React.createElement('button', {
+                                            onClick: () => updateScore(i, question.value),
+                                            className: 'bg-green-500 text-white px-4 py-2 rounded'
+                                        }, `+${question.value}`)
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+            }
+
+            return null;
+        };
+
+        ReactDOM.render(React.createElement(JeopardyGame), document.getElementById('root'));
+    </script>
+</body>
+</html>
