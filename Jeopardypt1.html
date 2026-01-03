@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeopardy Game Night</title>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+        .bg-blue-900 { background-color: #1e3a8a; }
+        .bg-blue-800 { background-color: #1e40af; }
+        .bg-blue-700 { background-color: #1d4ed8; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-blue-500 { background-color: #3b82f6; }
+        .bg-red-500 { background-color: #ef4444; }
+        .bg-red-600 { background-color: #dc2626; }
+        .bg-green-500 { background-color: #22c55e; }
+        .bg-green-600 { background-color: #16a34a; }
+        .bg-yellow-400 { background-color: #facc15; }
+        .bg-yellow-500 { background-color: #eab308; }
+        .text-white { color: white; }
+        .text-yellow-400 { color: #facc15; }
+        .text-blue-900 { color: #1e3a8a; }
+        .text-blue-700 { color: #1d4ed8; }
+        .min-h-screen { min-height: 100vh; }
+        .p-6 { padding: 1.5rem; }
+        .p-4 { padding: 1rem; }
+        .p-8 { padding: 2rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-2 { padding: 0.5rem; }
+        .px-8 { padding-left: 2rem; padding-right: 2rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mt-8 { margin-top: 2rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded { border-radius: 0.25rem; }
+        .text-5xl { font-size: 3rem; line-height: 1; }
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .font-bold { font-weight: 700; }
+        .text-center { text-align: center; }
+        .max-w-7xl { max-width: 80rem; }
+        .max-w-4xl { max-width: 56rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .grid { display: grid; }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+        .gap-4 { gap: 1rem; }
+        .gap-2 { gap: 0.5rem; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .w-full { width: 100%; }
+        .h-20 { height: 5rem; }
+        .min-h-80 { min-height: 200px; }
+        button { cursor: pointer; border: none; transition: all 0.2s; }
+        button:hover:not(:disabled) { transform: scale(1.05); opacity: 0.9; }
+        button:disabled { cursor: not-allowed; opacity: 0.5; }
+        .tracking-wider { letter-spacing: 0.05em; }
+        .category-header { min-height: 80px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        const { useState } = React;
+
+        const JeopardyGame = () => {
+            const [screen, setScreen] = useState('board');
+            const [selectedQuestion, setSelectedQuestion] = useState(null);
+            const [showAnswer, setShowAnswer] = useState(false);
+            const [teams, setTeams] = useState([
+                { name: 'Team 1', score: 0, color: 'bg-blue-500' },
+                { name: 'Team 2', score: 0, color: 'bg-red-500' },
+                { name: 'Team 3', score: 0, color: 'bg-green-500' }
+            ]);
+            const [usedQuestions, setUsedQuestions] = useState(new Set());
+
+            const categories = [
+                {
+                    name: 'Kitchen Items',
+                    questions: [
+                        { value: 200, q: 'This popular Kitchen appliance is often used for baking. Often associated with this appliance is a stove.', a: 'What is a Oven?' },
+                        { value: 400, q: 'A kitchen appliance that is used to fuse together a variety of ingredients. Often this appliance is used for making smoothies.', a: 'What is a Blender?' },
+                        { value: 600, q: 'Kept in or around kitchens this cleaning tool is used to clean the floor with water or a cleaning solution.', a: 'What is a Mop?' },
+                        { value: 800, q: 'a self-contained kitchen appliance that mixes, kneads, raises, and bakes dough in a single pan', a: 'What is a Bread Maker?' },
+                        { value: 1000, q: 'Another word for silverware that is often used to describe utensils used for eating food.', a: 'What is Cutlery?' }
+                    ]
+                },
+                {
+                    name: 'General Trivia',
+                    questions: [
+                        { value: 200, q: 'Although chocolate was invented first, this classic flavor is now the most popular ice cream choice in the United States and is often the base for sundaes.', a: 'What is Vanilla Ice Cream?' },
+                        { value: 400, q: 'In ancient Mesopotamia and Egypt, these objects were actually made of stone or wood to keep insects away from the sleeper\'s face; today, they are primarily used for comfort and spinal support.', a: 'What is a Pillow?' },
+                        { value: 600, q: 'In computing, this general term refers to the collection of data and instructions that tell a device how to function, serving as the virtual counterpart to physical "hardware."', a: 'What is Software?' },
+                        { value: 800, q: 'At a wedding ceremony, these solemn promises are exchanged to signify commitment; historically, they were strictly traditional, but modern couples often write their own personal versions.', a: 'What are Vows?' },
+                        { value: 1000, q: 'Derived from the Greek word for "fingernail" due to its banded appearance, this gemstone is most famous for its deep, solid black color.', a: 'What is Onyx?' }
+                    ]
+                },
+                {
+                    name: 'Weather',
+                    questions: [
+                        { value: 200, q: 'Meteorologists use this adjective to describe a pleasant day when temperatures are mild, typically caused by a high-pressure system or a passing tropical air mass.', a: 'What is Warm?' },
+                        { value: 400, q: 'Defined as a large, rotating system of clouds and thunderstorms that forms over tropical waters, this phenomenon requires sustained winds of at least 74 mph to earn this specific title.', a: 'What is a Hurricane?' },
+                        { value: 600, q: 'This form of wintry precipitation occurs when snowflakes partially melt in a warm layer of air but refreeze into small, translucent watery ice pellets before hitting the ground.', a: 'What is Sleet?' },
+                        { value: 800, q: 'While definitions vary by region, the World Meteorological Organization generally identifies this as a period of five or more consecutive days where the daily maximum temperature exceeds the average by at least 5°C (9°F).', a: 'What is a Heatwave?' },
+                        { value: 1000, q: 'During extreme weather events like record-breaking heat, these large-scale power failures occur when the electrical grid cannot meet soaring demand or when infrastructure is physically damaged.', a: 'What is a Blackout?' }
+                    ]
+                },
+                {
+                    name: 'Around the Farm',
+                    questions: [
+                        { value: 200, q: 'This structure is designed to provide shelter for poultry and includes a safe area for hens to roost at night and nesting boxes for laying eggs.', a: 'What is a Chicken Coop?' },
+                        { value: 400, q: 'Used for over 3,000 years since ancient Egypt, this decoy—traditionally stuffed with straw and dressed in old clothes—is placed in fields to discourage birds from feeding on crops.', a: 'What is a Scarecrow?' },
+                        { value: 600, q: 'These perennial plants are a staple of many orchards; as of 2026, modern growers often use specialized robotic harvesters to navigate through their rows during the autumn harvest.', a: 'What is an Apple Tree?' },
+                        { value: 800, q: 'In 2026, leading manufacturers like John Deere and Case IH have released autonomous, driverless models of this essential vehicle, allowing farmers to plow and plant fields using GPS and AI instead of manual steering.', a: 'What is a Tractor?' },
+                        { value: 1000, q: 'Often called "liquid gold" by organic farmers, this organic material must be properly aged or composted because it is considered "hot"—meaning its high ammonia and nitrogen levels can burn plant roots if applied fresh.', a: 'What is Manure?' }
+                    ]
+                },
+                {
+                    name: 'Occupations',
+                    questions: [
+                        { value: 200, q: 'This medical professional spends years in residency training to diagnose illnesses and prescribe treatments to keep patients healthy.', a: 'What is a Doctor?' },
+                        { value: 400, q: 'Working primarily with flour, yeast, and high-heat ovens, this professional often starts their workday in the very early hours of the morning to provide fresh goods for the community.', a: 'What is a Baker?' },
+                        { value: 600, q: 'This broad job title refers to professionals who apply mathematical and scientific principles to design, build, and maintain structures, machines, or systems.', a: 'What is an Engineer?' },
+                        { value: 800, q: 'A professional who uses data analysis, problem-solving, and communication to help organizations improve processes, systems, and products, acting as a bridge between business needs and technical solutions', a: 'What is a Business Analyst?' },
+                        { value: 1000, q: 'Requiring over a decade of specialized training, this surgeon performs some of the most delicate procedures in medicine, focusing specifically on the brain, spine, and peripheral nerves.', a: 'What is a Neurosurgeon?' }
+                    ]
+                },
+                {
+                    name: 'Board Games',
+                    questions: [
+                        { value: 200, q: 'This children\'s board game was rebranded in 1943 to replace scary reptiles with playground slides.', a: 'What is Chutes and Ladders?' },
+                        { value: 400, q: 'Played on a checkered board with 64 squares, this ancient "game of kings" ends when one player\'s monarch is placed in "checkmate,".', a: 'What is Chess?' },
+                        { value: 600, q: 'This world-famous property-trading game was based on The Landlord\'s Game, a 1903 invention by Elizabeth Magie designed to illustrate the economic dangers of wealth concentration.', a: 'What is Monopoly?' },
+                        { value: 800, q: 'In this 1949 mystery classic, players must determine which of six suspects—such as Miss Scarlett or Colonel Mustard—committed a murder using one of six weapons in a specific room of the manor.', a: 'What is Clue (or Cluedo)?' },
+                        { value: 1000, q: 'Originally called "Lexico," this word-building game features a board where players can theoretically score a record-breaking 1,778 points with the word "Oxyphenbutazone".', a: 'What is Scrabble?' }
+                    ]
+                }
+            ];
+
+            const updateScore = (teamIndex, amount) => {
+                setTeams(teams.map((team, i) => 
+                    i === teamIndex ? { ...team, score: Math.max(-100000, team.score + amount) } : team
+                ));
+            };
+
+            const selectQuestion = (catIndex, qIndex) => {
+                const key = `${catIndex}-${qIndex}`;
+                if (usedQuestions.has(key)) return;
+                
+                setSelectedQuestion({ catIndex, qIndex });
+                setShowAnswer(false);
+                setScreen('question');
+            };
+
+            const markUsed = () => {
+                const key = `${selectedQuestion.catIndex}-${selectedQuestion.qIndex}`;
+                setUsedQuestions(new Set([...usedQuestions, key]));
+                setScreen('board');
+                setSelectedQuestion(null);
+                setShowAnswer(false);
+            };
+
+            const goToBoard = () => {
+                setScreen('board');
+                setSelectedQuestion(null);
+                setShowAnswer(false);
+            };
+
+            const isUsed = (catIndex, qIndex) => {
+                return usedQuestions.has(`${catIndex}-${qIndex}`);
+            };
+
+            if (screen === 'board') {
+                return React.createElement('div', { className: 'min-h-screen bg-blue-900 p-6' },
+                    React.createElement('div', { className: 'max-w-7xl mx-auto' },
+                        React.createElement('h1', { className: 'text-5xl font-bold text-yellow-400 text-center mb-8 tracking-wider' }, 'JEOPARDY!'),
+                        
+                        React.createElement('div', { className: 'grid grid-cols-3 gap-4 mb-8' },
+                            teams.map((team, i) =>
+                                React.createElement('div', { key: i, className: `${team.color} rounded-lg p-4 text-white` },
+                                    React.createElement('h3', { className: 'text-xl font-bold text-center mb-2' }, team.name),
+                                    React.createElement('div', { className: 'text-4xl font-bold text-center mb-3' }, `$${team.score}`),
+                                    React.createElement('div', { className: 'flex gap-2 justify-center' },
+                                        React.createElement('button', {
+                                            onClick: () => updateScore(i, -100),
+                                            className: 'p-2 rounded',
+                                            style: { backgroundColor: 'rgba(255,255,255,0.2)' }
+                                        }, '−'),
+                                        React.createElement('button', {
+                                            onClick: () => updateScore(i, 100),
+                                            className: 'p-2 rounded',
+                                            style: { backgroundColor: 'rgba(255,255,255,0.2)' }
+                                        }, '+')
+                                    )
+                                )
+                            )
+                        ),
+
+                        React.createElement('div', { className: 'grid grid-cols-6 gap-2' },
+                            categories.map((cat, catIndex) =>
+                                React.createElement('div', { key: catIndex },
+                                    React.createElement('div', { className: 'bg-blue-700 text-yellow-400 text-center p-3 font-bold text-base mb-2 rounded category-header flex items-center justify-center' },
+                                        cat.name.toUpperCase()
+                                    ),
+                                    cat.questions.map((q, qIndex) => {
+                                        const used = isUsed(catIndex, qIndex);
+                                        return React.createElement('button', {
+                                            key: qIndex,
+                                            onClick: () => selectQuestion(catIndex, qIndex),
+                                            disabled: used,
+                                            className: `w-full h-20 mb-2 rounded text-3xl font-bold ${used ? 'text-blue-700' : 'bg-blue-600 text-yellow-400'}`,
+                                            style: { backgroundColor: used ? 'rgba(30,64,175,0.3)' : '#2563eb' }
+                                        }, used ? '✓' : `$${q.value}`);
+                                    })
+                                )
+                            )
+                        )
+                    )
+                );
+            }
+
+            if (screen === 'question' && selectedQuestion) {
+                const { catIndex, qIndex } = selectedQuestion;
+                const question = categories[catIndex].questions[qIndex];
+
+                return React.createElement('div', { className: 'min-h-screen bg-blue-900 flex items-center justify-center p-6' },
+                    React.createElement('div', { className: 'max-w-4xl w-full' },
+                        React.createElement('div', { className: 'bg-blue-700 rounded-lg p-8 mb-6' },
+                            React.createElement('div', { className: 'text-yellow-400 text-center text-2xl font-bold mb-4' },
+                                `${categories[catIndex].name.toUpperCase()} - $${question.value}`
+                            ),
+                            React.createElement('div', { className: 'bg-blue-800 rounded p-8 min-h-80 flex items-center justify-center' },
+                                React.createElement('p', { className: 'text-white text-3xl text-center' },
+                                    showAnswer ? question.a : question.q
+                                )
+                            )
+                        ),
+
+                        React.createElement('div', { className: 'flex gap-4 justify-center' },
+                            !showAnswer ?
+                                React.createElement('button', {
+                                    onClick: () => setShowAnswer(true),
+                                    className: 'bg-yellow-400 text-blue-900 px-8 py-4 rounded-lg text-xl font-bold'
+                                }, 'Show Answer') :
+                                React.createElement('button', {
+                                    onClick: markUsed,
+                                    className: 'bg-green-500 text-white px-8 py-4 rounded-lg text-xl font-bold'
+                                }, 'Mark Complete & Return'),
+                            
+                            React.createElement('button', {
+                                onClick: goToBoard,
+                                className: 'bg-blue-600 text-white px-8 py-4 rounded-lg text-xl font-bold'
+                            }, '🏠 Back to Board')
+                        ),
+
+                        React.createElement('div', { className: 'mt-8 grid grid-cols-3 gap-4' },
+                            teams.map((team, i) =>
+                                React.createElement('div', { key: i, className: `${team.color} rounded p-4` },
+                                    React.createElement('div', { className: 'text-white text-center font-bold mb-2' }, team.name),
+                                    React.createElement('div', { className: 'text-white text-3xl font-bold text-center mb-3' }, `$${team.score}`),
+                                    React.createElement('div', { className: 'flex gap-2 justify-center' },
+                                        React.createElement('button', {
+                                            onClick: () => updateScore(i, -question.value),
+                                            className: 'bg-red-500 text-white px-4 py-2 rounded'
+                                        }, `-${question.value}`),
+                                        React.createElement('button', {
+                                            onClick: () => updateScore(i, question.value),
+                                            className: 'bg-green-500 text-white px-4 py-2 rounded'
+                                        }, `+${question.value}`)
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+            }
+
+            return null;
+        };
+
+        ReactDOM.render(React.createElement(JeopardyGame), document.getElementById('root'));
+    </script>
+</body>
+</html>
+
